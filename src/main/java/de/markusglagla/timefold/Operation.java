@@ -19,10 +19,10 @@ public class Operation {
     private final int indexInJob;
 
     @PlanningVariable(valueRangeProviderRefs = "machineRange")
-    private Machine machine;
+    private Machine assignedMachine;
 
     @PlanningVariable(valueRangeProviderRefs = "startTimeRange")
-    private Integer startTime;
+    private Integer assignedStartTime;
 
     public Operation() {
         this.id = null;
@@ -48,8 +48,8 @@ public class Operation {
                 ", duration=" + duration +
                 ", jobId='" + jobId + '\'' +
                 ", indexInJob=" + indexInJob +
-                ", machine=" + machine +
-                ", startTime=" + startTime +
+                ", assignedMachine=" + assignedMachine +
+                ", assignedStartTime=" + assignedStartTime +
                 '}';
     }
 
@@ -73,15 +73,15 @@ public class Operation {
         return indexInJob;
     }
 
-    public Machine getMachine() {
-        return machine;
+    public Machine getAssignedMachine() {
+        return assignedMachine;
     }
 
-    public Integer getStartTime() {
-        return startTime;
+    public Integer getAssignedStartTime() {
+        return assignedStartTime;
     }
 
     public Integer getEndTime() {
-        return startTime != null ? startTime + duration : null;
+        return assignedStartTime != null ? assignedStartTime + duration : null;
     }
 }

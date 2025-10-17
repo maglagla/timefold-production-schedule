@@ -1,0 +1,26 @@
+@startuml
+skinparam classAttributeIconSize 0
+
+class Job {
+  +id: Long
+}
+
+class Operation <<PlanningEntity>> {
+  +id: String
+  +requiredMachineType: String
+  +duration: int
+  +assignedMachine: Machine <<PlanningVariable>>
+  +assignedStartTime: Integer <<PlanningVariable>>
+  +job: Job
+  +indexInJob: int
+}
+
+class Machine {
+  +id: String
+  +type: String
+}
+
+Job --> "*"  Operation : has >\n{ordered by indexInJob}
+Operation --> "0..1 " Machine : assigned to >
+
+@enduml

@@ -58,7 +58,7 @@ public class ComputeProductionScheduleService {
         asciiTable.addRow("Job", "Operation", "Machine Type", "Assigned Machine", "Start Time", "Duration", "End Time");
         asciiTable.addRule();
         for (Operation op : productionSchedule.getOperationList()) {
-            asciiTable.addRow(op.getJobId(), op.getId(), op.getRequiredMachineType(), op.getMachine().getId(), op.getStartTime(), op.getDuration(), op.getEndTime());
+            asciiTable.addRow(op.getJobId(), op.getId(), op.getRequiredMachineType(), op.getAssignedMachine().getId(), op.getAssignedStartTime(), op.getDuration(), op.getEndTime());
         }
         asciiTable.addRule();
         asciiTable.setTextAlignment(TextAlignment.CENTER);
@@ -91,7 +91,7 @@ public class ComputeProductionScheduleService {
         asciiTable.addRow(columnHeaders);
         asciiTable.addRule();
         for (Machine machine : productionSchedule.getMachineList()) {
-            asciiTable.addRow(getOperationsForMachineByStartTime2(productionSchedule, machine));
+            asciiTable.addRow(getOperationsForMachineByStartTime(productionSchedule, machine));
             asciiTable.addRule();
         }
         asciiTable.setTextAlignment(TextAlignment.CENTER);
@@ -99,14 +99,14 @@ public class ComputeProductionScheduleService {
         System.out.println(render);
     }
 
-    private List<String> getOperationsForMachineByStartTime2(ProductionSchedule productionSchedule, Machine machine) {
+    private List<String> getOperationsForMachineByStartTime(ProductionSchedule productionSchedule, Machine machine) {
         List<Integer> timeRange = productionSchedule.getStartTimeRange();
         String[] slots = new String[timeRange.size()];
         Arrays.fill(slots, "");
 
         for (Operation op : productionSchedule.getOperationList()) {
-            if (op.getMachine() != null && op.getMachine().equals(machine) && op.getStartTime() != null) {
-                int start = op.getStartTime();
+            if (op.getAssignedMachine() != null && op.getAssignedMachine().equals(machine) && op.getAssignedStartTime() != null) {
+                int start = op.getAssignedStartTime();
                 int end = start + op.getDuration();
                 for (int t = start; t < end; t++) {
                     int idx = timeRange.indexOf(t);
