@@ -13,43 +13,43 @@ public class ProductionConstraintProvider implements ConstraintProvider {
         return new Constraint[] {
                 matchingMachineType(factory),
                 noOverlapOnSameMachine(factory),
-                processOperationsInSequence(factory),
+                processJobsInSequence(factory),
                 totalMakespan(factory)
         };
     }
 
     private Constraint matchingMachineType(ConstraintFactory factory) {
-        return factory.forEach(Operation.class)
-                .filter(op -> !op.getRequiredMachineType().equals(op.getAssignedMachine().getType()))
+        return factory.forEach(Job.class)
+                .filter(job -> !job.getRequiredMachineType().equals(job.getAssignedMachine().getType()))
                 .penalize(HardSoftScore.ONE_HARD)
                 .asConstraint("Matching machine type");
     }
 
     private Constraint noOverlapOnSameMachine(ConstraintFactory factory) {
-        return factory.forEachUniquePair(Operation.class,
-                        Joiners.equal(Operation::getAssignedMachine))
-                .filter((op1,op2) -> op1.getAssignedStartTime() != null && op2.getAssignedStartTime() != null &&
-                        op1.getAssignedStartTime() < op2.getEndTime() &&
-                        op2.getAssignedStartTime() < op1.getEndTime())
+        return factory.forEachUniquePair(Job.class,
+                        Joiners.equal(Job::getAssignedMachine))
+                .filter((job1,job2) -> job1.getAssignedStartTime() != null && job2.getAssignedStartTime() != null &&
+                        job1.getAssignedStartTime() < job2.getEndTime() &&
+                        job2.getAssignedStartTime() < job1.getEndTime())
                 .penalize(HardSoftScore.ONE_HARD)
                 .asConstraint("No overlap on same machine");
     }
 
-    private Constraint processOperationsInSequence(ConstraintFactory factory) {
-        return factory.forEachUniquePair(Operation.class,
-                        Joiners.equal(Operation::getJobId),
-                        Joiners.lessThan(Operation::getIndexInJob))
-                .filter((op1, op2) -> op1.getAssignedStartTime() != null && op2.getAssignedStartTime() != null &&
-                        op1.getIndexInJob() < op2.getIndexInJob() &&
-                        op2.getAssignedStartTime() < op1.getEndTime())
+    private Constraint processJobsInSequence(ConstraintFactory factory) {
+        return factory.forEachUniquePair(Job.class,
+                        Joiners.equal(Job::getOrderId),
+                        Joiners.lessThan(Job::getIndexInOrder))
+                .filter((job1, job2) -> job1.getAssignedStartTime() != null && job2.getAssignedStartTime() != null &&
+                        job1.getIndexInOrder() < job2.getIndexInOrder() &&
+                        job2.getAssignedStartTime() < job1.getEndTime())
                 .penalize(HardSoftScore.ONE_HARD)
-                .asConstraint("Process operations in sequence");
+                .asConstraint("Process jobs in sequence");
     }
 
     private Constraint totalMakespan(ConstraintFactory factory) {
-        return factory.forEach(Operation.class)
-                .filter(ja -> ja.getAssignedStartTime() != null)
-                .penalize(HardSoftScore.ONE_SOFT, Operation::getEndTime)
+        return factory.forEach(Job.class)
+                .filter(job -> job.getAssignedStartTime() != null)
+                .penalize(HardSoftScore.ONE_SOFT, Job::getEndTime)
                 .asConstraint("Total makespan");
     }
 

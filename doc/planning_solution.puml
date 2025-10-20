@@ -1,0 +1,21 @@
+@startuml
+skinparam classAttributeIconSize 0
+
+class ProductionSchedule <<PlanningSolution>> {
+  +machineList: List<Machine> <<ValueRangeProvider>>
+  +startTimeRange: List<Integer> <<ValueRangeProvider>>
+  +jobList: List<Job> <<PlanningEntityCollectionProperty>>
+  +score: HardSoftScore <<PlanningScore>>
+}
+
+class Job <<PlanningEntity>> {
+}
+
+class Machine {
+}
+
+ProductionSchedule --> "*" Machine : machineList >
+ProductionSchedule --> "*"  Job : jobList >
+Job --> "0..1 " Machine : assignedMachine >
+
+@enduml

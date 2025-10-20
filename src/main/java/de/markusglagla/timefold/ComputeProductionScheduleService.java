@@ -24,10 +24,10 @@ public class ComputeProductionScheduleService {
     public void compute() throws ExecutionException, InterruptedException {
 
         ProductionSchedule problem = loadProblem();
-        var solution = solverManager.solve(1L, problem);
+        var solverJob = solverManager.solve(1L, problem);
 
-        printSolution(solution.getFinalBestSolution());
-        printByMachine(solution.getFinalBestSolution());
+        printSolution(solverJob.getFinalBestSolution());
+        printByMachine(solverJob.getFinalBestSolution());
     }
 
     private ProductionSchedule loadProblem() {
@@ -39,14 +39,14 @@ public class ComputeProductionScheduleService {
                 ),
                 Arrays.asList(0, 1, 2, 3, 4, 5, 6, 7, 8, 9),
                 List.of(
-                    new Operation("O1", "PRESS", 1, "J1", 1),
-                    new Operation("O2", "GRIND", 3, "J1", 2),
-                    new Operation("O3", "PAINT", 2, "J1", 3),
-                    new Operation("O4", "PRESS", 1, "J2", 1),
-                    new Operation("O5", "GRIND", 3, "J2", 2),
-                    new Operation("O6", "PAINT", 2, "J2", 3),
-                    new Operation("O7", "PRESS", 1, "J3", 1),
-                    new Operation("O8", "PAINT", 1, "J3", 2)
+                    new Job("J1", "PRESS", 1, "O1", 1),
+                    new Job("J2", "GRIND", 3, "O1", 2),
+                    new Job("J3", "PAINT", 2, "O1", 3),
+                    new Job("J4", "PRESS", 1, "O2", 1),
+                    new Job("J5", "GRIND", 3, "O2", 2),
+                    new Job("J6", "PAINT", 2, "O2", 3),
+                    new Job("J7", "PRESS", 1, "O3", 1),
+                    new Job("J8", "PAINT", 1, "O3", 2)
                 ));
     }
 
@@ -55,10 +55,11 @@ public class ComputeProductionScheduleService {
         AsciiTable asciiTable = new AsciiTable();
         asciiTable.getRenderer().setCWC(new CWC_LongestLine().add(20, 50).add(20, 50)); // Erste und zweite Spalte auf 20 Zeichen
         asciiTable.addRule();
-        asciiTable.addRow("Job", "Operation", "Machine Type", "Assigned Machine", "Start Time", "Duration", "End Time");
+        asciiTable.addRow("Order", "JobId", "Machine Type", "Assigned Machine", "Start Time", "Duration", "End Time");
         asciiTable.addRule();
-        for (Operation op : productionSchedule.getOperationList()) {
-            asciiTable.addRow(op.getJobId(), op.getId(), op.getRequiredMachineType(), op.getAssignedMachine().getId(), op.getAssignedStartTime(), op.getDuration(), op.getEndTime());
+        for (Job job : productionSchedule.getJobList()) {
+            asciiTable.addRow(job.getOrderId(), job.getId(), job.getRequiredMachineType(), job.getAssignedMachine().getId()
+                    + " (" + job.getAssignedMachine().getType() + ")", job.getAssignedStartTime(), job.getDuration(), job.getEndTime());
         }
         asciiTable.addRule();
         asciiTable.setTextAlignment(TextAlignment.CENTER);
@@ -67,7 +68,7 @@ public class ComputeProductionScheduleService {
     }
 
     private void printByMachine(ProductionSchedule productionSchedule) {
-        logger.info("Operations by machine");
+        logger.info("Jobs by machine");
         List<String> columnHeaders = new java.util.ArrayList<>(List.of("Machine", "Type"));
         columnHeaders.addAll(productionSchedule.getStartTimeRange().stream()
                 .map(Object::toString)
@@ -91,7 +92,7 @@ public class ComputeProductionScheduleService {
         asciiTable.addRow(columnHeaders);
         asciiTable.addRule();
         for (Machine machine : productionSchedule.getMachineList()) {
-            asciiTable.addRow(getOperationsForMachineByStartTime(productionSchedule, machine));
+            asciiTable.addRow(getJobsForMachineByStartTime(productionSchedule, machine));
             asciiTable.addRule();
         }
         asciiTable.setTextAlignment(TextAlignment.CENTER);
@@ -99,28 +100,29 @@ public class ComputeProductionScheduleService {
         System.out.println(render);
     }
 
-    private List<String> getOperationsForMachineByStartTime(ProductionSchedule productionSchedule, Machine machine) {
+    private List<String> getJobsForMachineByStartTime(ProductionSchedule productionSchedule, Machine machine) {
         List<Integer> timeRange = productionSchedule.getStartTimeRange();
         String[] slots = new String[timeRange.size()];
         Arrays.fill(slots, "");
 
-        for (Operation op : productionSchedule.getOperationList()) {
-            if (op.getAssignedMachine() != null && op.getAssignedMachine().equals(machine) && op.getAssignedStartTime() != null) {
-                int start = op.getAssignedStartTime();
-                int end = start + op.getDuration();
+        for (Job job : productionSchedule.getJobList()) {
+            if (job.getAssignedMachine() != null && job.getAssignedMachine().equals(machine) && job.getAssignedStartTime() != null) {
+                int start = job.getAssignedStartTime();
+                int end = start + job.getDuration();
                 for (int t = start; t < end; t++) {
                     int idx = timeRange.indexOf(t);
                     if (idx >= 0) {
-                        slots[idx] = op.getJobId() + " " + op.getIndexInJob();
+                        //slots[idx] = job.getOrderId() + " " + job.getIndexInOrder();
+                        slots[idx] = job.getId();
                     }
                 }
             }
         }
 
-        List<String> machineOperations = new java.util.ArrayList<>();
-        machineOperations.add(machine.getId());
-        machineOperations.add(machine.getType());
-        machineOperations.addAll(Arrays.asList(slots));
-        return machineOperations;
+        List<String> machineJobs = new java.util.ArrayList<>();
+        machineJobs.add(machine.getId());
+        machineJobs.add(machine.getType());
+        machineJobs.addAll(Arrays.asList(slots));
+        return machineJobs;
     }
 }

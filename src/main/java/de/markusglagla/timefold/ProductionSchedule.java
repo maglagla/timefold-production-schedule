@@ -18,25 +18,25 @@ public class ProductionSchedule {
     private List<Integer> startTimeRange;
 
     @PlanningEntityCollectionProperty
-    private List<Operation> operationList;
+    private List<Job> jobList;
 
     @PlanningScore
     private HardSoftScore score;
 
     public ProductionSchedule() {}
 
-    public ProductionSchedule(List<Machine> machineList, List<Integer> startTimeRange, List<Operation> operationList) {
+    public ProductionSchedule(List<Machine> machineList, List<Integer> startTimeRange, List<Job> jobList) {
         this.machineList = machineList;
         this.startTimeRange = startTimeRange;
-        this.operationList = operationList;
+        this.jobList = jobList;
     }
 
     public List<Machine> getMachineList() {
         return machineList;
     }
 
-    public List<Operation> getOperationList() {
-        return operationList;
+    public List<Job> getJobList() {
+        return jobList;
     }
 
     public List<Integer> getStartTimeRange() {

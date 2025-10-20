@@ -5,7 +5,7 @@ import ai.timefold.solver.core.api.domain.lookup.PlanningId;
 import ai.timefold.solver.core.api.domain.variable.PlanningVariable;
 
 @PlanningEntity
-public class Operation {
+public class Job {
 
     @PlanningId
     private final String id;
@@ -14,9 +14,9 @@ public class Operation {
 
     private final int duration;
 
-    private final String jobId;
+    private final String orderId;
 
-    private final int indexInJob;
+    private final int indexInOrder;
 
     @PlanningVariable(valueRangeProviderRefs = "machineRange")
     private Machine assignedMachine;
@@ -24,30 +24,30 @@ public class Operation {
     @PlanningVariable(valueRangeProviderRefs = "startTimeRange")
     private Integer assignedStartTime;
 
-    public Operation() {
+    public Job() {
         this.id = null;
         this.requiredMachineType = null;
         this.duration = 0;
-        this.jobId = null;
-        this.indexInJob = 0;
+        this.orderId = null;
+        this.indexInOrder = 0;
     }
 
-    public Operation(String id, String requiredMachineType, int duration, String jobId, int indexInJob) {
+    public Job(String id, String requiredMachineType, int duration, String orderId, int indexInJob) {
         this.id = id;
         this.requiredMachineType = requiredMachineType;
         this.duration = duration;
-        this.jobId = jobId;
-        this.indexInJob = indexInJob;
+        this.orderId = orderId;
+        this.indexInOrder = indexInJob;
     }
 
     @Override
     public String toString() {
-        return "Operation{" +
+        return "Job{" +
                 "id='" + id + '\'' +
                 ", requiredMachineType='" + requiredMachineType + '\'' +
                 ", duration=" + duration +
-                ", jobId='" + jobId + '\'' +
-                ", indexInJob=" + indexInJob +
+                ", orderId='" + orderId + '\'' +
+                ", indexInOrder=" + indexInOrder +
                 ", assignedMachine=" + assignedMachine +
                 ", assignedStartTime=" + assignedStartTime +
                 '}';
@@ -65,12 +65,12 @@ public class Operation {
         return requiredMachineType;
     }
 
-    public String getJobId() {
-        return jobId;
+    public String getOrderId() {
+        return orderId;
     }
 
-    public int getIndexInJob() {
-        return indexInJob;
+    public int getIndexInOrder() {
+        return indexInOrder;
     }
 
     public Machine getAssignedMachine() {
